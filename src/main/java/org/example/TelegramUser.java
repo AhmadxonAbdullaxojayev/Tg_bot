@@ -5,6 +5,15 @@ public class TelegramUser {
     private String step;
     private String mag;
     private String fullName;
+    private String selectLang;
+
+    public String getSelectLang() {
+        return selectLang;
+    }
+
+    public void setSelectLang(String selectLang) {
+        this.selectLang = selectLang;
+    }
 
     public String getChatId() {
         return chatId;
@@ -14,7 +23,7 @@ public class TelegramUser {
         this.chatId = chatId;
     }
 
-    public String getStep(String writeMsg) {
+    public String getStep() {
         return step;
     }
 
