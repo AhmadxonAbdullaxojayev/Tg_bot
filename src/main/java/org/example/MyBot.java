@@ -63,11 +63,30 @@ public class MyBot extends TelegramLongPollingBot {
                     throw new RuntimeException(e);
                 }
 
-                {
-
-                }
                     user.setStep(BotConstant.SELECT_LANG);
-                } else if (user.getStep().equals (BotConstant.WRITE_MSG)){
+                }
+              else if (user.getStep().equals(BotConstant.SELECT_LANG)){
+                    try {
+                        SendMessage sendMessage = new SendMessage();
+                        sendMessage.setText("Iltimos mashina turini tanlang ");
+                        sendMessage.setChatId(chatId);
+                        InlineKeyboardMarkup inlineKeyboardMarkup = new InlineKeyboardMarkup();
+                        sendMessage.setReplyMarkup(inlineKeyboardMarkup);
+                        execute(sendMessage);
+                        List<InlineKeyboardButton> inlineKeyboardButtons = new ArrayList<>();
+                        InlineKeyboardButton inlineKeyboardButton = new InlineKeyboardButton();
+                        inlineKeyboardButton.setText("BMW");
+                        inlineKeyboardButton.setCallbackData("\uD83D\uDCB8");
+                        inlineKeyboardButtons.add(inlineKeyboardButton);
+                        List<List<InlineKeyboardButton>> tr = new ArrayList<>();
+                        tr.add(inlineKeyboardButtons);
+                        inlineKeyboardMarkup.setKeyboard(tr);
+                    } catch (TelegramApiException e) {
+                        throw new RuntimeException(e);
+                    }
+                }
+
+                else if (user.getStep().equals (BotConstant.WRITE_MSG)){
                    user.setMag(text);
                    setText(chatId,user.getSelectLang().equals(BotQuery.UZ_SELECT) ?
                            "Admin Tez orada siz bilan boglanadi. " :
@@ -77,10 +96,9 @@ public class MyBot extends TelegramLongPollingBot {
                 }
             }
 
-            }
 
 
-        else if (update.hasCallbackQuery()){
+            }  else if (update.hasCallbackQuery()){
             String chatId = String.valueOf(Long.valueOf(update.getCallbackQuery().getFrom().getId().toString()));
             String data = update.getCallbackQuery().getData();
             TelegramUser user = saveUser(chatId);
@@ -95,9 +113,13 @@ public class MyBot extends TelegramLongPollingBot {
                 user.setStep(BotConstant.WRITE_MSG);
             }
 
-        }
-        }
-        private void setLang(String chatId,TelegramUser user ) throws TelegramApiException {
+
+
+       }
+       }
+
+
+    private void setLang(String chatId,TelegramUser user ) throws TelegramApiException {
 
             SendMessage sendMessage = new SendMessage();
             sendMessage.setText(user.getFullName()+" ILTIMOS TINI TANLANG\n" +
@@ -125,6 +147,7 @@ public class MyBot extends TelegramLongPollingBot {
             execute(sendMessage);
 
         }
+
         private TelegramUser saveUser(String chatId){
             for(TelegramUser user : users){
                 if (user.getChatId().equals(chatId)){

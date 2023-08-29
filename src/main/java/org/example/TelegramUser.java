@@ -6,6 +6,15 @@ public class TelegramUser {
     private String mag;
     private String fullName;
     private String selectLang;
+    private String Car;
+
+    public String getCar() {
+        return Car;
+    }
+
+    public void setCar(String car) {
+        Car = car;
+    }
 
     public String getSelectLang() {
         return selectLang;
