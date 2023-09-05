@@ -1,5 +1,6 @@
 package org.example;
 
+import lombok.NonNull;
 import org.telegram.telegrambots.bots.TelegramLongPollingBot;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.methods.send.SendPhoto;
@@ -16,6 +17,7 @@ import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 public class MyBot extends TelegramLongPollingBot {
     List<TelegramUser> users = new ArrayList<>();
@@ -119,14 +121,14 @@ public class MyBot extends TelegramLongPollingBot {
                     InlineKeyboardButton inlineKeyboardButtonUZ = new InlineKeyboardButton();
 
                     inlineKeyboardButtonUZ.setText("BMW \uD83D\uDCB8");
-                    inlineKeyboardButtonUZ.setCallbackData(BotQuery.UZ_SELECT);
+                    inlineKeyboardButtonUZ.setCallbackData(BotQuery.BMW_SELECT);
 
 
 
                     InlineKeyboardButton inlineKeyboardButton = new InlineKeyboardButton();
 
                     inlineKeyboardButton.setText("MERSADES \uD83D\uDCB8");
-                    inlineKeyboardButton.setCallbackData(BotQuery.UZ_SELECT);
+                    inlineKeyboardButton.setCallbackData(BotQuery.MERCEDES_SELECT);
 
                     inlineKeyboardButtons.add(inlineKeyboardButtonUZ);
                     inlineKeyboardButtons.add(inlineKeyboardButton);
@@ -147,9 +149,11 @@ public class MyBot extends TelegramLongPollingBot {
                 }
             }
 
-        } else if (user.getStep().equals(BotConstant.SELECT_CAR_TYPE)) {
-            if (update.getCallbackQuery().getData().equals(BotQuery.UZ_SELECT)) {
-                TelegramUser user = saveUser(chatId);
+        }
+        else if (update.hasCallbackQuery()) {
+            String chatId = update.getCallbackQuery().getMessage().getChatId().toString();
+            if (update.getCallbackQuery().getData().equals(BotQuery.BMW_SELECT)) {
+                TelegramUser user = saveUser(Objects.requireNonNull(chatId));
                 user.setCarType(BotConstant.BMW);
                 user.setStep(BotConstant.BMW);
 
@@ -181,6 +185,18 @@ public class MyBot extends TelegramLongPollingBot {
 
     }
 
+    private TelegramUser getMe(String chatId) {
+        for (TelegramUser user : users) {
+            if (user.getChatId().equals(chatId)) {
+                return user;
+            }
+        }
+        TelegramUser newUser = new TelegramUser();
+        newUser.setChatId(chatId);
+        users.add(newUser);
+        return newUser;
+
+    }
 
 
     private void setLang(String chatId, TelegramUser user) throws TelegramApiException {
@@ -218,12 +234,12 @@ public class MyBot extends TelegramLongPollingBot {
                 return user;
             }
         }
-        TelegramUser user = new TelegramUser();
-        user.setChatId(chatId);
-        users.add(user);
-        return user;
-    }
 
+        TelegramUser newUser = new TelegramUser();
+        newUser.setChatId(chatId);
+        users.add(newUser);
+        return newUser;
+    }
     @Override
     public String getBotUsername() {
         return "https://t.me/Cars_buy_bot";
