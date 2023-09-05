@@ -1,6 +1,7 @@
 package org.example;
 
 import lombok.NonNull;
+import lombok.SneakyThrows;
 import org.telegram.telegrambots.bots.TelegramLongPollingBot;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.methods.send.SendPhoto;
@@ -15,6 +16,8 @@ import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 
 
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -26,16 +29,17 @@ public class MyBot extends TelegramLongPollingBot {
     public MyBot() {
         super("6494265943:AAHiPDr_vuIAGh6ZNyD0zrFU_4_cizYAsdY");
     }
+
     TelegramUser user = new TelegramUser();
+
+    @SneakyThrows
     @Override
     public void onUpdateReceived(Update update) {
 
 
-
-
         if (update.hasMessage()) {
             String chatId = update.getMessage().getChatId().toString();
-            TelegramUser user =saveUser(chatId);
+            TelegramUser user = saveUser(chatId);
             Message message = update.getMessage();
             System.out.println("user step => " + user.getStep());
             if (message.hasText()) {
@@ -106,8 +110,9 @@ public class MyBot extends TelegramLongPollingBot {
         } else if (update.hasCallbackQuery()) {
             String chatId = update.getCallbackQuery().getMessage().getChatId().toString();
             TelegramUser user = getMe(chatId);
+
             System.out.println(user.getStep());
-            if (user.getStep().equals(BotConstant.SELECT_LANG)) {
+            if (update.getCallbackQuery().getData().contains("LANG")) {
 
                 try {
                     SendMessage sendMessage = new SendMessage();
@@ -122,7 +127,6 @@ public class MyBot extends TelegramLongPollingBot {
 
                     inlineKeyboardButtonUZ.setText("BMW \uD83D\uDCB8");
                     inlineKeyboardButtonUZ.setCallbackData(BotQuery.BMW_SELECT);
-
 
 
                     InlineKeyboardButton inlineKeyboardButton = new InlineKeyboardButton();
@@ -147,43 +151,42 @@ public class MyBot extends TelegramLongPollingBot {
                 } catch (TelegramApiException e) {
                     throw new RuntimeException(e);
                 }
-            }
-
-        }
-        else if (update.hasCallbackQuery()) {
-            String chatId = update.getCallbackQuery().getMessage().getChatId().toString();
-            if (update.getCallbackQuery().getData().equals(BotQuery.BMW_SELECT)) {
-                TelegramUser user = saveUser(Objects.requireNonNull(chatId));
+            } else if (update.getCallbackQuery().getData().equals(BotQuery.BMW_SELECT)) {
+                user = saveUser(Objects.requireNonNull(chatId));
                 user.setCarType(BotConstant.BMW);
                 user.setStep(BotConstant.BMW);
 
                 try {
                     SendPhoto sendPhoto = new SendPhoto();
                     sendPhoto.setChatId(chatId);
-                    sendPhoto.setPhoto(new InputFile(new File("BMW-M5-CS-G-Power-tuning-5-scaled.jpg")));
+                    sendPhoto.setPhoto(new InputFile(new FileInputStream("image/BMW-M5-CS-G-Power-tuning-5-scaled.jpg"),"BMW-M5-CS-G-Power-tuning-5-scaled"));
                     execute(sendPhoto);
                 } catch (TelegramApiException e) {
-                    throw new RuntimeException(e);
+                    System.out.println("Error sending photo: " + e.getMessage());
+                    e.printStackTrace();
+                }catch (FileNotFoundException e) {
+                    System.out.println("Image file not found: " + e.getMessage());
+                    e.printStackTrace();
                 }
             } else if (update.getCallbackQuery().getData().equals(BotQuery.MERCEDES_SELECT)) {
-                TelegramUser user = saveUser(chatId);
+                user = saveUser(chatId);
                 user.setCarType(BotConstant.MERCEDES);
                 user.setStep(BotConstant.MERCEDES);
 
                 try {
                     SendPhoto sendPhoto = new SendPhoto();
                     sendPhoto.setChatId(chatId);
-                    sendPhoto.setPhoto(new InputFile(new File("7K1A5572-scaled.jpg")));
+                    sendPhoto.setPhoto(new InputFile(new FileInputStream("image/7K1A5572-scaled.jpg"),"/7K1A5572-scaled.jpg"));
                     execute(sendPhoto);
                 } catch (TelegramApiException e) {
                     throw new RuntimeException(e);
                 }
             }
         }
-           
 
 
     }
+
 
     private TelegramUser getMe(String chatId) {
         for (TelegramUser user : users) {
@@ -240,6 +243,7 @@ public class MyBot extends TelegramLongPollingBot {
         users.add(newUser);
         return newUser;
     }
+
     @Override
     public String getBotUsername() {
         return "https://t.me/Cars_buy_bot";
@@ -256,7 +260,6 @@ public class MyBot extends TelegramLongPollingBot {
         }
 
     }
-
 
 
 }
