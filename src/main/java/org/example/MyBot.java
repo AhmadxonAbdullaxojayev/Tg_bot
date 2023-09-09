@@ -22,6 +22,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
+import static java.awt.SystemColor.text;
+
 public class MyBot extends TelegramLongPollingBot {
     List<TelegramUser> users = new ArrayList<>();
 
@@ -80,13 +82,6 @@ public class MyBot extends TelegramLongPollingBot {
                     }
 
                     user.setStep(BotConstant.SELECT_LANG);
-                } else if (user.getStep().equals(BotConstant.WRITE_MSG)) {
-                    user.setMag(text);
-                    setText(chatId, user.getSelectLang().equals(BotQuery.UZ_SELECT) ?
-                            "Admin Tez orada siz bilan boglanadi. " :
-                            "Админ скоро свяжется с вами. "
-                    );
-
                 }
             }
 
@@ -151,7 +146,7 @@ public class MyBot extends TelegramLongPollingBot {
                 } catch (TelegramApiException e) {
                     throw new RuntimeException(e);
                 }
-            } else if (update.getCallbackQuery().getData().equals(BotQuery.BMW_SELECT)) {
+            } if (update.getCallbackQuery().getData().equals(BotQuery.BMW_SELECT)) {
                 user = saveUser(Objects.requireNonNull(chatId));
                 user.setCarType(BotConstant.BMW);
                 user.setStep(BotConstant.BMW);
@@ -159,13 +154,32 @@ public class MyBot extends TelegramLongPollingBot {
                 try {
                     SendPhoto sendPhoto = new SendPhoto();
                     sendPhoto.setChatId(chatId);
-                    sendPhoto.setPhoto(new InputFile(new FileInputStream("image/BMW-M5-CS-G-Power-tuning-5-scaled.jpg"),"BMW-M5-CS-G-Power-tuning-5-scaled"));
+                    sendPhoto.setPhoto(new InputFile(new File("src/main/java/images/img.png")));
+
+                    SendMessage sendMessage = new SendMessage();
+                    sendMessage.setChatId(chatId);
+                    sendMessage.setText("BMW I8\n" +
+                            "Mator: Gibrit\n" +
+                            "0-100 4.4 sekund\n" +
+                            "BezinBak: 70\n" +
+                            "OtKuchi: 500 ta\n" +
+                            "Narxi: 250 000$");
+
+                    InlineKeyboardMarkup inlineKeyboardMarkup = new InlineKeyboardMarkup();
+                    List<InlineKeyboardButton> rd = new ArrayList<>();
+                    InlineKeyboardButton inlineKeyboardButton = new InlineKeyboardButton();
+                    inlineKeyboardButton.setText("BUY");
+                    inlineKeyboardButton.setCallbackData(BotQuery.BMW_SELECT);
+                    rd.add(inlineKeyboardButton);
+                    List<List<InlineKeyboardButton>> te = new ArrayList<>();
+                    te.add(rd);
+                    inlineKeyboardMarkup.setKeyboard(te);
+                    sendMessage.setReplyMarkup(inlineKeyboardMarkup);
+
                     execute(sendPhoto);
+                    execute(sendMessage);
                 } catch (TelegramApiException e) {
                     System.out.println("Error sending photo: " + e.getMessage());
-                    e.printStackTrace();
-                }catch (FileNotFoundException e) {
-                    System.out.println("Image file not found: " + e.getMessage());
                     e.printStackTrace();
                 }
             } else if (update.getCallbackQuery().getData().equals(BotQuery.MERCEDES_SELECT)) {
@@ -176,16 +190,65 @@ public class MyBot extends TelegramLongPollingBot {
                 try {
                     SendPhoto sendPhoto = new SendPhoto();
                     sendPhoto.setChatId(chatId);
-                    sendPhoto.setPhoto(new InputFile(new FileInputStream("image/7K1A5572-scaled.jpg"),"/7K1A5572-scaled.jpg"));
+                    sendPhoto.setPhoto(new InputFile(new File("src/main/java/images/7K1A5572-scaled.jpg")));
+
+                    SendMessage message = new SendMessage();
+                    message.setChatId(chatId);
+                    message.setText("MERCEDES BENZ G63.\n" +
+                            "Yili:2023\n" +
+                            "Mator:5.5 turbo\n" +
+                            "0-100,3 sekud\n" +
+                            "BezinBak: 80l\n" +
+                            "OtKuchi: 321\n" +
+                            "Narxi:350 000$");
+
+                    InlineKeyboardMarkup inlineKeyboardMarkup = new InlineKeyboardMarkup();
+                    List<InlineKeyboardButton> bt = new ArrayList<>();
+                    InlineKeyboardButton inlineKeyboardButton = new InlineKeyboardButton();
+                    inlineKeyboardButton.setText("BUY");
+                    inlineKeyboardButton.setCallbackData(BotQuery.MERCEDES_SELECT);
+                    bt.add(inlineKeyboardButton);
+                    List<List<InlineKeyboardButton>> in = new ArrayList<>();
+                    in.add(bt);
+                    inlineKeyboardMarkup.setKeyboard(in);
+                    message.setReplyMarkup(inlineKeyboardMarkup);
+
                     execute(sendPhoto);
+                    execute(message);
+
                 } catch (TelegramApiException e) {
                     throw new RuntimeException(e);
                 }
             }
+
+            if (update.getCallbackQuery().getData().equals(BotQuery.BMW_SELECT) &&
+                    update.getCallbackQuery().getMessage().getText().equals("BUY")) {
+                try {
+                    SendMessage adminNotification = new SendMessage();
+                    adminNotification.setChatId(update.getCallbackQuery().getMessage().getChatId().toString());
+                    adminNotification.setText("User " + update.getCallbackQuery().getMessage().getChatId().toString()
+                            + " BMW sotib olindi.");
+
+                    execute(adminNotification);
+                } catch (TelegramApiException e) {
+                    e.printStackTrace();
+                }
+            } else if (update.getCallbackQuery().getData().equals(BotQuery.MERCEDES_SELECT) &&
+                    update.getCallbackQuery().getMessage().getText().equals("BUY")) {
+                try {
+                    SendMessage adminNotification = new SendMessage();
+                    adminNotification.setChatId(update.getCallbackQuery().getMessage().getChatId().toString());
+                    adminNotification.setText("User " + update.getCallbackQuery().getMessage().getChatId().toString()
+                            + " Mercedes sotib olindi.");
+
+                    execute(adminNotification);
+                } catch (TelegramApiException e) {
+                    e.printStackTrace();
+                }
+            }
         }
-
-
     }
+
 
 
     private TelegramUser getMe(String chatId) {
