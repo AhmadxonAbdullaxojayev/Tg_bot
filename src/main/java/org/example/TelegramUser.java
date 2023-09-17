@@ -3,6 +3,7 @@ package org.example;
 
 import lombok.Getter;
 import lombok.Setter;
+import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 
 @Getter
 @Setter
@@ -28,5 +29,16 @@ public class TelegramUser {
                 ", mag='" + mag + '\'' +
                 ", fullName='" + fullName + '\'' +
                 '}';
+    }
+
+    public void execute(SendMessage message) {
+    }
+
+    public void setCarType(String carType) {
+        this.carType = carType;
+    }
+
+    public String getCarType() {
+        return carType;
     }
 }

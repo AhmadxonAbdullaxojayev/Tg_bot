@@ -1,28 +1,33 @@
 package org.example;
 
+
+import jdk.javadoc.internal.doclets.formats.html.markup.HtmlStyle;
 import lombok.NonNull;
 import lombok.SneakyThrows;
 import org.telegram.telegrambots.bots.TelegramLongPollingBot;
+import org.telegram.telegrambots.meta.TelegramBotsApi;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.methods.send.SendPhoto;
-import org.telegram.telegrambots.meta.api.objects.InputFile;
-import org.telegram.telegrambots.meta.api.objects.Message;
+import org.telegram.telegrambots.meta.api.objects.*;
 
-import org.telegram.telegrambots.meta.api.objects.PhotoSize;
-import org.telegram.telegrambots.meta.api.objects.Update;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.InlineKeyboardMarkup;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.InlineKeyboardButton;
+import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.KeyboardButton;
+import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.KeyboardRow;
+import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
+import org.telegram.telegrambots.meta.generics.BotSession;
+import org.telegram.telegrambots.meta.generics.TelegramBot;
+import org.telegram.telegrambots.meta.api.objects.replykeyboard.ReplyKeyboardMarkup;
+import java.io.File;
+import org.telegram.telegrambots.meta.api.methods.send.SendVideo;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 
-import static java.awt.SystemColor.text;
 
 public class MyBot extends TelegramLongPollingBot {
     List<TelegramUser> users = new ArrayList<>();
@@ -81,7 +86,6 @@ public class MyBot extends TelegramLongPollingBot {
                         throw new RuntimeException(e);
                     }
 
-                    user.setStep(BotConstant.SELECT_LANG);
                 }
             }
 
@@ -146,7 +150,8 @@ public class MyBot extends TelegramLongPollingBot {
                 } catch (TelegramApiException e) {
                     throw new RuntimeException(e);
                 }
-            } if (update.getCallbackQuery().getData().equals(BotQuery.BMW_SELECT)) {
+            }
+            if (update.getCallbackQuery().getData().equals(BotQuery.BMW_SELECT)) {
                 user = saveUser(Objects.requireNonNull(chatId));
                 user.setCarType(BotConstant.BMW);
                 user.setStep(BotConstant.BMW);
@@ -169,19 +174,19 @@ public class MyBot extends TelegramLongPollingBot {
                     List<InlineKeyboardButton> rd = new ArrayList<>();
                     InlineKeyboardButton inlineKeyboardButton = new InlineKeyboardButton();
                     inlineKeyboardButton.setText("BUY");
-                    inlineKeyboardButton.setCallbackData(BotQuery.BMW_SELECT);
+                    inlineKeyboardButton.setCallbackData(BotQuery.BMW_SELECT2);
                     rd.add(inlineKeyboardButton);
                     List<List<InlineKeyboardButton>> te = new ArrayList<>();
                     te.add(rd);
                     inlineKeyboardMarkup.setKeyboard(te);
                     sendMessage.setReplyMarkup(inlineKeyboardMarkup);
-
                     execute(sendPhoto);
                     execute(sendMessage);
                 } catch (TelegramApiException e) {
                     System.out.println("Error sending photo: " + e.getMessage());
                     e.printStackTrace();
                 }
+
             } else if (update.getCallbackQuery().getData().equals(BotQuery.MERCEDES_SELECT)) {
                 user = saveUser(chatId);
                 user.setCarType(BotConstant.MERCEDES);
@@ -206,9 +211,10 @@ public class MyBot extends TelegramLongPollingBot {
                     List<InlineKeyboardButton> bt = new ArrayList<>();
                     InlineKeyboardButton inlineKeyboardButton = new InlineKeyboardButton();
                     inlineKeyboardButton.setText("BUY");
-                    inlineKeyboardButton.setCallbackData(BotQuery.MERCEDES_SELECT);
+                    inlineKeyboardButton.setCallbackData(BotQuery.MERCEDES_SELECT1);
                     bt.add(inlineKeyboardButton);
                     List<List<InlineKeyboardButton>> in = new ArrayList<>();
+
                     in.add(bt);
                     inlineKeyboardMarkup.setKeyboard(in);
                     message.setReplyMarkup(inlineKeyboardMarkup);
@@ -216,38 +222,117 @@ public class MyBot extends TelegramLongPollingBot {
                     execute(sendPhoto);
                     execute(message);
 
+
                 } catch (TelegramApiException e) {
                     throw new RuntimeException(e);
                 }
-            }
 
-            if (update.getCallbackQuery().getData().equals(BotQuery.BMW_SELECT) &&
-                    update.getCallbackQuery().getMessage().getText().equals("BUY")) {
+            }
+            if (update.hasCallbackQuery() && update.getCallbackQuery().getData().equals(BotQuery.BMW_SELECT2)) {
                 try {
-                    SendMessage adminNotification = new SendMessage();
-                    adminNotification.setChatId(update.getCallbackQuery().getMessage().getChatId().toString());
-                    adminNotification.setText("User " + update.getCallbackQuery().getMessage().getChatId().toString()
-                            + " BMW sotib olindi.");
+                    String chatId2 = update.getCallbackQuery().getMessage().getChatId().toString();
+                    String fullName = user.getFullName();
+
+                    SendMessage adminNotification = new SendMessage(chatId2,
+                            fullName + " BMW sotib oldingiz.");
 
                     execute(adminNotification);
                 } catch (TelegramApiException e) {
                     e.printStackTrace();
                 }
-            } else if (update.getCallbackQuery().getData().equals(BotQuery.MERCEDES_SELECT) &&
-                    update.getCallbackQuery().getMessage().getText().equals("BUY")) {
+            } else if (update.hasCallbackQuery() && update.getCallbackQuery().getData().equals(BotQuery.MERCEDES_SELECT1)) {
                 try {
-                    SendMessage adminNotification = new SendMessage();
-                    adminNotification.setChatId(update.getCallbackQuery().getMessage().getChatId().toString());
-                    adminNotification.setText("User " + update.getCallbackQuery().getMessage().getChatId().toString()
-                            + " Mercedes sotib olindi.");
+                    String chatId3 = update.getCallbackQuery().getMessage().getChatId().toString();
+                    String fullName = user.getFullName();
 
-                    execute(adminNotification);
+                    SendMessage adminNotificationn = new SendMessage(chatId3,
+                            fullName + " MERCEDES sotib oldingiz.");
+
+
+                    execute(adminNotificationn);
+                } catch (TelegramApiException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+        if (update.hasCallbackQuery() && update.getCallbackQuery().getData().equals(BotQuery.BMW_SELECT2)) {
+            try {
+                String chatId3 = update.getCallbackQuery().getMessage().getChatId().toString();
+
+                SendMessage paymentMethodMessage = new SendMessage(chatId3, "To'lov usulini tanlang:");
+
+                ReplyKeyboardMarkup replyMarkup = new ReplyKeyboardMarkup();
+                replyMarkup.setResizeKeyboard(true);
+                replyMarkup.setOneTimeKeyboard(true);
+
+                KeyboardRow row1 = new KeyboardRow();
+                row1.add( "Karta bilan to'lash");
+
+                KeyboardRow row2 = new KeyboardRow();
+                row2.add("Bitkoin bilan to'lash");
+
+                replyMarkup.setKeyboard(Arrays.asList(row1, row2));
+
+                paymentMethodMessage.setReplyMarkup(replyMarkup);
+
+                execute(paymentMethodMessage);
+
+            } catch (TelegramApiException e) {
+                e.printStackTrace();
+            }
+        }
+        else if (update.hasMessage() && update.getMessage().hasText()) {
+            String messageText = update.getMessage().getText();
+            String chatId = update.getMessage().getChatId().toString();
+
+            if (messageText.equals("Karta bilan to'lash")) {
+                SendMessage cardNumberMessage = new SendMessage(chatId, "Iltimos, 1212 2562 8936 2585 ga tolovni o'tqazing:");
+                execute(cardNumberMessage);
+            } else {
+                String cardNumber = messageText.replaceAll("\\s+", "");
+                if (cardNumber.equals("1212256289362585")) {
+                    SendMessage paymentAmountMessage = new SendMessage(chatId, "Iltimos, to'lov summasini kiriting:");
+                    execute(paymentAmountMessage);
+                } else {
+                    try {
+                        int paymentAmount = Integer.parseInt(messageText);
+                        if (paymentAmount >= 250000) {
+                            SendMessage confirmationMessage = new SendMessage(chatId, "To'lov muvaffaqiyatli amalga oshirildi!");
+                            execute(confirmationMessage);
+
+                        } else {
+                            SendMessage insufficientAmountMessage = new SendMessage(chatId, "To'lov summasi yetarli emas. Iltimos, to'liq summani kiriting:");
+                            execute(insufficientAmountMessage);
+
+                            String adminChatId = "1068147717";
+                            SendMessage adminErrorMessage = new SendMessage(adminChatId, "To'lov amalga oshmadi! Summa yetarli emas.");
+                            execute(adminErrorMessage);
+                        }
+                    } catch (NumberFormatException e) {
+                        //SendMessage invalidAmountMessage = new SendMessage(chatId, "Noto'g'ri formatda summa kiritildi. Iltimos, to'liq summani kiriting:");
+                        //execute(invalidAmountMessage);
+                    }
+                }
+            }
+        }
+        if (update.getMessage().hasText()){
+            String str = update.getMessage().getText();
+            if (str.equals("To'lov muvaffaqiyatli amalga oshirildi!")){
+                SendVideo videoMessage = new SendVideo();
+                @NonNull String chatId = null;
+                videoMessage.setChatId(chatId);
+                videoMessage.setVideo(new InputFile("src/main/java/Vidio"));
+                videoMessage.setCaption(String.valueOf(HtmlStyle.caption));
+
+                try {
+                    execute(videoMessage);
                 } catch (TelegramApiException e) {
                     e.printStackTrace();
                 }
             }
         }
     }
+
 
 
 
