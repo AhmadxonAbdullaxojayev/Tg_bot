@@ -317,15 +317,26 @@ public class MyBot extends TelegramLongPollingBot {
         }
         if (update.getMessage().hasText()){
             String str = update.getMessage().getText();
+            String chatId = update.getMessage().getChatId().toString();
             if (str.equals("To'lov muvaffaqiyatli amalga oshirildi!")){
+                try {
+                InlineKeyboardButton videoButton = new InlineKeyboardButton();
+                videoButton.setText("Videoni ko'rish");
+
+                InlineKeyboardMarkup inlineMarkup = new InlineKeyboardMarkup();
+                List<List<InlineKeyboardButton>> keyboardRows = new ArrayList<>();
+                List<InlineKeyboardButton> row = new ArrayList<>();
+                row.add(videoButton);
+                keyboardRows.add(row);
+                inlineMarkup.setKeyboard(keyboardRows);
+                
                 SendVideo videoMessage = new SendVideo();
-                @NonNull String chatId = null;
                 videoMessage.setChatId(chatId);
-                videoMessage.setVideo(new InputFile("src/main/java/Vidio"));
+                videoMessage.setVideo(new InputFile("src/main/java/images"));
                 videoMessage.setCaption(String.valueOf(HtmlStyle.caption));
 
-                try {
-                    execute(videoMessage);
+                execute(videoMessage);
+              execute(videoButton);
                 } catch (TelegramApiException e) {
                     e.printStackTrace();
                 }
@@ -333,6 +344,32 @@ public class MyBot extends TelegramLongPollingBot {
         }
     }
 
+    private void execute(InlineKeyboardButton videoButton) {
+        try {
+            // Video xabarni tuzamiz
+            SendVideo videoMessage = new SendVideo();
+            @NonNull String chatId = null;
+            videoMessage.setChatId(chatId);  // chatId o'zgaruvchisi avval olinishi kerak
+            videoMessage.setVideo(new InputFile("src/main/java/images"));  // Video fayli manzili
+            videoMessage.setCaption(String.valueOf(HtmlStyle.caption));  // Sarlavha
+
+            // Inline keyboard tugmasini tuzamiz
+            InlineKeyboardMarkup inlineMarkup = new InlineKeyboardMarkup();
+            List<List<InlineKeyboardButton>> keyboardRows = new ArrayList<>();
+            List<InlineKeyboardButton> row = new ArrayList<>();
+            row.add(videoButton);
+            keyboardRows.add(row);
+            inlineMarkup.setKeyboard(keyboardRows);
+
+            // Video xabar bilan inline keyboard tugmasini jo'natamiz
+            videoMessage.setReplyMarkup(inlineMarkup);
+
+            // Video xabarini jo'natamiz
+            execute(videoMessage);
+        } catch (TelegramApiException e) {
+            e.printStackTrace();
+        }
+    }
 
 
 
